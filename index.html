@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расписание 3582</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; padding: 16px; display: flex; justify-content: center; }
+        .app { width: 100%; max-width: 450px; }
+        
+        header { text-align: center; margin-bottom: 16px; }
+        h2 { color: #38bdf8; font-size: 1.3rem; margin-bottom: 4px; }
+        .subtitle { font-size: 0.8rem; color: #94a3b8; }
+        
+        .row { display: flex; gap: 6px; margin-bottom: 12px; }
+        button { flex: 1; padding: 10px 4px; border: none; background: #1e293b; color: #94a3b8; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        button.active { background: #0284c7; color: #ffffff; }
+        .day-btn.active { background: #10b981; color: #ffffff; }
+
+        .card { background: #1e293b; border-radius: 12px; padding: 14px; margin-bottom: 10px; border-left: 4px solid #38bdf8; }
+        .time { font-size: 0.85rem; color: #38bdf8; font-weight: bold; margin-bottom: 4px; }
+        .title { font-size: 0.95rem; font-weight: 600; margin-bottom: 6px; line-height: 1.3; }
+        .details { font-size: 0.8rem; color: #94a3b8; display: flex; flex-direction: column; gap: 2px; }
+        .empty { text-align: center; color: #64748b; padding: 40px 0; }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <header>
+        <h2>Группа 3582</h2>
+        <div class="subtitle" id="currentInfo"></div>
+    </header>
+    
+    <div class="row">
+        <button id="oddBtn" onclick="setWeek('odd')">Нечетная</button>
+        <button id="evenBtn" onclick="setWeek('even')">Четная</button>
+    </div>
+
+    <div class="row">
+        <button class="day-btn" onclick="setDay(1)">Пн</button>
+        <button class="day-btn" onclick="setDay(2)">Вт</button>
+        <button class="day-btn" onclick="setDay(3)">Ср</button>
+        <button class="day-btn" onclick="setDay(4)">Чт</button>
+        <button class="day-btn" onclick="setDay(5)">Пт</button>
+    </div>
+
+    <div id="content"></div>
+</div>
+
+<script>
+const data = {
+    even: {
+        1: [
+            { time: "18:00 - 19:40", name: "Инженерная геодезия (Лекция)", room: "ауд. каф.", teacher: "Хасаев Р. А." },
+            { time: "20:00 - 21:40", name: "Инженерная геодезия (Практика)", room: "ауд. каф.", teacher: "Хасаев Р. А." }
+        ],
+        2: [
+            { time: "18:00 - 19:40", name: "Основы права (Лекция)", room: "Корпус 2А, ауд. ТСО 392 (этаж 3)" },
+            { time: "20:00 - 21:40", name: "Основы права (Практика)", room: "Корпус 2А, ауд. ТСО 392 (этаж 3)" }
+        ],
+        3: [
+            { time: "18:00 - 19:40", name: "Физика (Лекция)", room: "ауд. каф.", teacher: "Дьяченко С. В." },
+            { time: "20:00 - 21:40", name: "Физика (Практика)", room: "ауд. каф.", teacher: "Дьяченко С. В." }
+        ],
+        4: [
+            { time: "18:00 - 19:40", name: "Математика (Практика)", room: "ауд. каф." },
+            { time: "20:00 - 21:40", name: "Социология и психология (Лекция)", room: "Корпус 1, ауд. 211 (этаж 2)", teacher: "Лысенко Е. М." }
+        ],
+        5: [
+            { time: "18:00 - 19:40", name: "История архитектуры и строительства (Лекция)", room: "ауд. каф.", teacher: "Бачурин С. В." },
+            { time: "20:00 - 21:40", name: "История архитектуры и строительства (Практика)", room: "ауд. каф.", teacher: "Бачурин С. В." }
+        ]
+    },
+    odd: {
+        1: [
+            { time: "18:00 - 19:40", name: "Системы компьютерного конструирования (Лаб.)", room: "ауд. каф.", teacher: "Хасаев Р. А." },
+            { time: "20:00 - 21:40", name: "Системы компьютерного конструирования (Практ.)", room: "ауд. каф.", teacher: "Хасаев Р. А." }
+        ],
+        2: [
+            { time: "18:00 - 19:40", name: "Теоретическая механика (Лекция)", room: "ауд. каф.", teacher: "Костюк Е. Г." },
+            { time: "20:00 - 21:40", name: "Теоретическая механика (Практика)", room: "ауд. каф.", teacher: "Костюк Е. Г." }
+        ],
+        3: [
+            { time: "18:00 - 19:40", name: "Иностранный язык (Практика)", room: "ауд. каф." },
+            { time: "20:00 - 21:40", name: "Физика (Лаб.)", room: "ауд. каф.", teacher: "Дьяченко С. В." }
+        ],
+        4: [
+            { time: "18:00 - 19:40", name: "Математика (Лекция)", room: "ауд. каф." },
+            { time: "20:00 - 21:40", name: "Социология и психология (Практика)", room: "Корпус 1, ауд. 211 (этаж 2)", teacher: "Лысенко Е. М." }
+        ],
+        5: [
+            { time: "18:00 - 19:40", name: "Философия (Лекция)", room: "ауд. каф.", teacher: "Селиверстова Н. А." },
+            { time: "20:00 - 21:40", name: "Философия (Практика)", room: "ауд. каф.", teacher: "Селиверстова Н. А." }
+        ]
+    }
+};
+
+// Функция определения текущей учебной недели (от 1 сентября)
+function getAutoWeek() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    
+    let startYear = month >= 8 ? year : year - 1;
+    let sept1 = new Date(startYear, 8, 1);
+    
+    let dayOfWeek = sept1.getDay();
+    let diffToMonday = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+    let firstMonday = new Date(sept1);
+    firstMonday.setDate(sept1.getDate() + diffToMonday);
+    firstMonday.setHours(0,0,0,0);
+
+    const diffInMs = now - firstMonday;
+    const weekNum = Math.floor(diffInMs / (1000 * 60 * 60 * 24 * 7)) + 1;
+    
+    return (weekNum % 2 !== 0) ? 'odd' : 'even';
+}
+
+// Функция определения текущего дня недели
+function getAutoDay() {
+    const day = new Date().getDay();
+    return (day === 0 || day === 6) ? 1 : day;
+}
+
+let selectedWeek = getAutoWeek();
+let selectedDay = getAutoDay();
+
+function setWeek(w) { selectedWeek = w; render(); }
+function setDay(d) { selectedDay = d; render(); }
+
+function render() {
+    document.getElementById('oddBtn').className = selectedWeek === 'odd' ? 'active' : '';
+    document.getElementById('evenBtn').className = selectedWeek === 'even' ? 'active' : '';
+
+    const dayBtns = document.querySelectorAll('.day-btn');
+    dayBtns.forEach((btn, idx) => {
+        btn.className = (idx + 1) === selectedDay ? 'day-btn active' : 'day-btn';
+    });
+
+    const now = new Date();
+    const weekText = selectedWeek === 'odd' ? 'Нечетная' : 'Четная';
+    document.getElementById('currentInfo').innerText = `Сегодня: ${now.toLocaleDateString('ru-RU')} (${weekText} неделя)`;
+
+    const items = data[selectedWeek][selectedDay] || [];
+    const container = document.getElementById('content');
+
+    if (items.length === 0) {
+        container.innerHTML = '<div class="empty">На этот день пар нет 🎉</div>';
+        return;
+    }
+
+    container.innerHTML = items.map(item => `
+        <div class="card">
+            <div class="time">${item.time}</div>
+            <div class="title">${item.name}</div>
+            <div class="details">
+                <span>📍 ${item.room}</span>
+                ${item.teacher ? '<span>👤 ' + item.teacher + '</span>' : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+render();
+</script>
+</body>
+</html>
